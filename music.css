@@ -1,0 +1,135 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+h1 {
+    position: relative;
+    text-align: center;
+    top: 100px;
+    left: 33px;
+    color: rgb(171, 246, 246);
+    font-size: 70px;
+    text-shadow: rgb(202, 249, 254) 0px 0px 66px;
+}
+body {
+    background-color: rgb(14, 6, 81);
+    height: 100vh;
+    overflow-y: auto;
+}
+.contain {
+    font-family: Arial, sans-serif;
+    background-color: rgb(14, 6, 81);
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  
+}
+.music-player {
+    background: rgb(64, 83, 246);
+    padding: 20px;
+    width: 70vh;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+h2 {
+    margin: 0 0 10px 0;
+}
+button {
+    margin: 0 5px;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 25px;
+    background-color: transparent;
+    border: none;
+}
+.progress-bar {
+    width: inherit;
+    padding: 10px;
+}
+.progress-bar input {
+    width: 90%;
+}
+.track-list {
+    margin-top: 10px;
+    text-align: left;
+    max-height: 500px;
+    overflow-y: auto;
+}
+input {
+    font-size: 26px;
+}
+.track-list-item {
+    background-color: rgb(92, 92, 211);
+    cursor: pointer;
+    padding: 5px;
+    border: 1px solid #ddd;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+.track-list-item:hover {
+    background-color: #f0f0f0;
+}
+.songcontrol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 45px;
+    background-color: rgb(45, 45, 220);
+    height: 430px;
+    width: 450px;
+    margin-bottom: 10px;
+}
+img {
+    margin-top: 10px;
+    width: 100%; /* Make it responsive */
+    max-width: 200px; /* Max width for larger screens */
+    height: 300px;
+    margin-bottom: 50px;
+    object-fit: cover; /* Cover the image within the dimensions */
+    border-radius: 8px; 
+}
+
+aside {
+    width: 500px;
+    margin-left: 100px;
+}
+.heading {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.time-info {
+    margin-top: 10px;
+    color: white;
+    font-size: 18px;
+    text-align: center;
+}
+#current-time {
+    margin-left: 40px;
+}
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    position: relative;
+}
+#total-duration {
+    margin-right: 40px;
+}
+.upload-icon {
+    cursor: pointer; 
+    font-size: 22px; 
+    color: #f8f8f8; 
+
+}
+
+
+.upload-icon:hover {
+    color: #a8d1ff;
+}

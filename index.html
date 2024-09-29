@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Music Player</title>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    <link rel="stylesheet" href="music.css">
+</head>
+<body>
+<header>
+    <div class="heading">
+        <h1>Music Player</h1>
+    </div>
+</header>
+
+<div class="contain">
+    <div class="music-player">
+        <audio id="audio"></audio>
+        <h2 id="track-title">Track Title</h2>
+        <div class="songcontrol">
+            <img src="" alt="Track Cover" id="cover-image" />
+            <div class="controls">
+                <span id="current-time">00:00</span>
+                <button id="prev_song" aria-label="Previous song"><i class="fa-solid fa-angle-left"></i></button>
+                <button id="toggle-btn" aria-label="Play/Pause"><i class="fa-solid fa-play" id="toggle-icon"></i></button>
+                <button id="next_song" aria-label="Next song"><i class="fa-solid fa-angle-right"></i></button>
+                <span id="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar">
+                <input type="range" id="progress" value="0" step="1" disabled />
+            </div>
+        </div>
+        <label for="file-input" class="upload-icon">
+            <i class="fa-solid fa-upload"></i>
+        </label>
+        <input type="file" id="file-input" accept="audio/*" multiple style="display: none;" />
+    </div>
+    <aside>
+        <div class="track-list" id="track-list"></div>
+    </aside>
+</div>
+
+<script>
+    const audio = document.getElementById("audio");
+    const toggleBtn = document.getElementById("toggle-btn");
+    const progress = document.getElementById("progress");
+    const trackTitle = document.getElementById("track-title");
+    const fileInput = document.getElementById("file-input");
+    const trackListDiv = document.getElementById("track-list");
+    const toggleIcon = document.getElementById("toggle-icon");
+    const prevSongBtn = document.getElementById("prev_song");
+    const nextSongBtn = document.getElementById("next_song");
+    const currentTimeElement = document.getElementById("current-time");
+    const totalDurationElement = document.getElementById("total-duration");
+    const coverImage = document.getElementById("cover-image");
+
+    let tracks = [];
+    let currentTrackIndex = 0;
+
+    // Format time in mm:ss
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+    }
+
+    // Load track function
+    function loadTrack(index) {
+        if (tracks.length > 0) {
+            audio.src = URL.createObjectURL(tracks[index]);
+            trackTitle.textContent = tracks[index].name;
+            coverImage.src = ""; // Clear image initially
+
+            // Extract album art
+            jsmediatags.read(tracks[index], {
+                onSuccess: function(tag) {
+                    if (tag.tags && tag.tags.picture) {
+                        const picture = tag.tags.picture;
+                        const imageData = new Blob([new Uint8Array(picture.data)], { type: picture.format });
+                        const imageUrl = URL.createObjectURL(imageData);
+                        coverImage.src = imageUrl; // Set the cover image
+                    } else {
+                        console.log('No picture found in the music file.');
+                        coverImage.src = "path/to/fallback-image.jpg"; // Fallback image
+                    }
+                },
+                onError: function(error) {
+                    console.error('Error reading tags: ', error);
+                    coverImage.src = "path/to/fallback-image.jpg"; // Fallback image
+                }
+            });
+
+            progress.disabled = false; // Enable progress bar
+            currentTimeElement.textContent = "00:00"; // Reset current time display
+            totalDurationElement.textContent = "00:00"; // Reset duration until metadata is loaded
+        } else {
+            trackTitle.textContent = "No track selected";
+            progress.disabled = true; // Disable progress bar
+            coverImage.src = ""; // Clear image
+        }
+    }
+
+    // Toggle play and pause
+    toggleBtn.addEventListener("click", () => {
+        if (audio.paused) {
+            audio.play();
+            toggleIcon.classList.remove("fa-play");
+            toggleIcon.classList.add("fa-pause");
+        } else {
+            audio.pause();
+            toggleIcon.classList.remove("fa-pause");
+            toggleIcon.classList.add("fa-play");
+        }
+    });
+
+    // Play previous track
+    prevSongBtn.addEventListener("click", () => {
+        currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+        loadTrack(currentTrackIndex);
+        audio.play();
+        toggleIcon.classList.replace("fa-play", "fa-pause");
+    });
+
+    // Play next track
+    nextSongBtn.addEventListener("click", () => {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        loadTrack(currentTrackIndex);
+        audio.play();
+        toggleIcon.classList.replace("fa-play", "fa-pause");
+    });
+
+    // Update progress bar and time display
+    audio.addEventListener("timeupdate", () => {
+        const progressValue = (audio.currentTime / audio.duration) * 100;
+        progress.value = progressValue;
+        currentTimeElement.textContent = formatTime(audio.currentTime);
+    });
+
+    // Seek audio when progress bar is changed
+    progress.addEventListener("input", () => {
+        audio.currentTime = (progress.value / 100) * audio.duration;
+    });
+
+    // Handle file upload
+    fileInput.addEventListener("change", (event) => {
+        const files = event.target.files;
+        if (files.length > 0) {
+            tracks = Array.from(files); // Store uploaded tracks
+            currentTrackIndex = 0; // Reset to the first track
+            loadTrack(currentTrackIndex); // Load the first track
+            updateTrackList(); // Update displayed track list
+        }
+    });
+
+    // Update displayed track list
+    function updateTrackList() {
+        trackListDiv.innerHTML = ""; // Clear existing track list
+        tracks.forEach((track, index) => {
+            const trackItem = document.createElement("div");
+            trackItem.className = "track-list-item";
+            trackItem.textContent = track.name;
+
+            // Play track when clicked
+            trackItem.addEventListener("click", () => {
+                currentTrackIndex = index;
+                loadTrack(currentTrackIndex);
+                audio.play();
+                toggleIcon.classList.replace("fa-play", "fa-pause");
+            });
+
+            trackListDiv.appendChild(trackItem);
+        });
+    }
+
+    // Automatically go to next track when current ends
+    audio.addEventListener("ended", () => {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        loadTrack(currentTrackIndex);
+        audio.play();
+        toggleIcon.classList.replace("fa-play", "fa-pause");
+    });
+
+    // Update total duration when metadata is loaded
+    audio.addEventListener("loadedmetadata", () => {
+        totalDurationElement.textContent = formatTime(audio.duration);
+    });
+</script>
+</body>
+</html>
